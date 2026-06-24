@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exoplanet Detection | Learners' Space Astronomy</title>
+  <meta name="description" content="A scroll-based interactive astronomy module on exoplanet detection methods: transits, radial velocity, pulsar timing, astrometry, direct imaging, microlensing and future technology." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="starfield" aria-hidden="true"></canvas>
+  <div class="aurora aurora-one" aria-hidden="true"></div>
+  <div class="aurora aurora-two" aria-hidden="true"></div>
+  <div class="progress-line" aria-hidden="true"><span id="progressFill"></span></div>
+
+  <header class="topbar">
+    <a class="brand" href="#intro" aria-label="Go to intro">
+      <span class="brand-mark">◌</span>
+      <span>Exoplanet Detection</span>
+    </a>
+    <nav class="topnav" aria-label="Main navigation">
+      <a href="#methods">Methods</a>
+      <a href="#transits">Transit</a>
+      <a href="#radial-velocity">RV</a>
+      <a href="#resources">Resources</a>
+    </nav>
+    <div class="slide-count"><span id="currentSlide">01</span> / <span id="totalSlides">12</span></div>
+  </header>
+
+  <aside class="rail" aria-label="Section shortcuts">
+    <a href="#intro" data-label="Intro" class="dot active"><span></span></a>
+    <a href="#why" data-label="Why" class="dot"><span></span></a>
+    <a href="#timeline" data-label="History" class="dot"><span></span></a>
+    <a href="#methods" data-label="Map" class="dot"><span></span></a>
+    <a href="#transits" data-label="Transit" class="dot"><span></span></a>
+    <a href="#radial-velocity" data-label="RV" class="dot"><span></span></a>
+    <a href="#wobble" data-label="Wobble" class="dot"><span></span></a>
+    <a href="#imaging" data-label="Image" class="dot"><span></span></a>
+    <a href="#microlensing" data-label="Lens" class="dot"><span></span></a>
+    <a href="#compare" data-label="Compare" class="dot"><span></span></a>
+    <a href="#future" data-label="Future" class="dot"><span></span></a>
+    <a href="#resources" data-label="Read" class="dot"><span></span></a>
+  </aside>
+
+  <main class="deck">
+    <section class="slide hero" id="intro" data-title="Intro">
+      <div class="section-kicker">Learners' Space Astronomy</div>
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Krittika style web module · original redesign</p>
+          <h1>Hunting worlds <br><span>beyond our Sun</span></h1>
+          <p class="lead">Exoplanets are too distant to visit and usually too dim to photograph directly. So astronomers detect their fingerprints: dips in starlight, stellar wobbles, bent light, shifted spectra and timing delays.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#methods">Start the module</a>
+            <a class="button ghost" href="#transits">Try a simulator</a>
+          </div>
+        </div>
+        <div class="orbital-card" aria-label="Decorative star and exoplanet system">
+          <div class="orbit orbit-a"></div>
+          <div class="orbit orbit-b"></div>
+          <div class="sun-core"></div>
+          <div class="planet p1"></div>
+          <div class="planet p2"></div>
+          <div class="scan-line"></div>
+          <p>Not every planet can be seen. But every planet changes something.</p>
+        </div>
+      </div>
+      <p class="hint">Scroll · use arrow keys · tap the dots</p>
+    </section>
+
+    <section class="slide" id="why" data-title="Why">
+      <div class="chapter">Section 01</div>
+      <div class="split">
+        <div>
+          <h2>Why do we care?</h2>
+          <p class="big-text">Each new planet challenges our picture of how planetary systems form, migrate and survive.</p>
+          <p>Detection is only the first step. After discovery, we try to infer mass, radius, density, orbit, atmosphere and possible habitability.</p>
+        </div>
+        <div class="fact-grid">
+          <article class="fact-card">
+            <span>01</span>
+            <h3>Detection</h3>
+            <p>Is there a planet at all, or is the signal caused by stellar activity or instrumental noise?</p>
+          </article>
+          <article class="fact-card">
+            <span>02</span>
+            <h3>Orbit</h3>
+            <p>Period, semi-major axis, eccentricity and inclination tell us how the planet moves.</p>
+          </article>
+          <article class="fact-card">
+            <span>03</span>
+            <h3>Size + Mass</h3>
+            <p>Transit depth gives radius; radial velocity gives a minimum mass.</p>
+          </article>
+          <article class="fact-card">
+            <span>04</span>
+            <h3>Atmosphere</h3>
+            <p>Spectroscopy can reveal gases, clouds, temperature structure and habitability clues.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="timeline" data-title="History">
+      <div class="chapter">Section 02</div>
+      <h2>From suspicion to discovery</h2>
+      <div class="timeline">
+        <div class="time-node">
+          <b>Before 1990s</b>
+          <p>Claims existed, but precision was not enough. Many early astrometric claims were rejected.</p>
+        </div>
+        <div class="time-node active-node">
+          <b>1992</b>
+          <p>The first confirmed exoplanets were found around pulsar PSR B1257+12 using timing residuals.</p>
+        </div>
+        <div class="time-node">
+          <b>1995</b>
+          <p>51 Pegasi b became the first confirmed planet around a Sun-like star: a surprising Hot Jupiter.</p>
+        </div>
+        <div class="time-node">
+          <b>Now</b>
+          <p>Thousands of exoplanets are known, and multiple detection methods are often combined.</p>
+        </div>
+      </div>
+      <div class="quote-card">
+        <p>“The trick is not always to see the planet. The trick is to see what the planet does to the star, the light, or the timing.”</p>
+      </div>
+    </section>
+
+    <section class="slide" id="methods" data-title="Methods">
+      <div class="chapter">Section 03</div>
+      <h2>The detection toolbox</h2>
+      <p class="slide-intro">Different planets leave different signatures. A good exoplanet claim is usually a story built from more than one clue.</p>
+      <div class="method-map">
+        <article>
+          <span class="method-icon">▾</span>
+          <h3>Transit Photometry</h3>
+          <p>Planet crosses the star and blocks a tiny fraction of light.</p>
+        </article>
+        <article>
+          <span class="method-icon">↔</span>
+          <h3>Radial Velocity</h3>
+          <p>Star moves toward/away from us, shifting spectral lines.</p>
+        </article>
+        <article>
+          <span class="method-icon">◍</span>
+          <h3>Astrometry</h3>
+          <p>Star traces a tiny wobble on the sky around the barycentre.</p>
+        </article>
+        <article>
+          <span class="method-icon">◉</span>
+          <h3>Pulsar Timing</h3>
+          <p>Pulse arrival times arrive early/late due to orbital motion.</p>
+        </article>
+        <article>
+          <span class="method-icon">✦</span>
+          <h3>Direct Imaging</h3>
+          <p>Suppress the host star's glare and detect the planet's light.</p>
+        </article>
+        <article>
+          <span class="method-icon">⌁</span>
+          <h3>Microlensing</h3>
+          <p>Gravity bends background starlight; a planet adds a brief anomaly.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="slide interactive" id="transits" data-title="Transit">
+      <div class="chapter">Section 04</div>
+      <div class="split reverse">
+        <div>
+          <h2>Transit method</h2>
+          <p class="big-text">When a planet crosses the stellar disk, the observed brightness dips.</p>
+          <div class="formula-card">
+            <span>Transit depth</span>
+            <strong>ΔF / F ≈ (R<sub>p</sub> / R<sub>★</sub>)²</strong>
+            <p>A bigger planet blocks more light. Repeated dips reveal the orbital period.</p>
+          </div>
+          <div class="controls">
+            <label>Planet radius <input id="planetSize" type="range" min="4" max="20" value="10"></label>
+            <label>Orbit speed <input id="transitSpeed" type="range" min="1" max="8" value="4"></label>
+          </div>
+        </div>
+        <div class="sim-card">
+          <canvas id="transitCanvas" width="720" height="460" aria-label="Transit simulation canvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide interactive" id="radial-velocity" data-title="Radial Velocity">
+      <div class="chapter">Section 05</div>
+      <div class="split">
+        <div>
+          <h2>Radial velocity</h2>
+          <p class="big-text">The planet and star orbit their common barycentre. The star's line-of-sight velocity creates a periodic Doppler shift.</p>
+          <div class="formula-card">
+            <span>Simplified idea</span>
+            <strong>red shift ↔ moving away · blue shift ↔ moving toward</strong>
+            <p>RV curves can reveal period, eccentricity and minimum mass M<sub>p</sub> sin i.</p>
+          </div>
+          <div class="controls">
+            <label>Planet mass <input id="rvMass" type="range" min="1" max="12" value="6"></label>
+            <label>Inclination <input id="rvInclination" type="range" min="5" max="90" value="70"></label>
+          </div>
+        </div>
+        <div class="sim-card">
+          <canvas id="rvCanvas" width="720" height="460" aria-label="Radial velocity simulation canvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="wobble" data-title="Wobble">
+      <div class="chapter">Section 06</div>
+      <h2>Wobble family: pulsar timing + astrometry</h2>
+      <div class="two-columns">
+        <article class="glass-panel">
+          <h3>Pulsar Timing</h3>
+          <p>Pulsars behave like ultra-precise clocks. A planet makes the pulsar move around the barycentre, so pulses arrive slightly early or late.</p>
+          <div class="pulse-demo" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <p class="mono">timing residual = observed arrival − predicted arrival</p>
+        </article>
+        <article class="glass-panel">
+          <h3>Astrometry</h3>
+          <p>Instead of measuring speed toward us, astrometry measures the tiny sideways motion of the star on the sky.</p>
+          <svg class="astrometry-svg" viewBox="0 0 420 260" role="img" aria-label="Astrometric wobble illustration">
+            <path d="M110 130 C130 70, 190 60, 210 130 C230 200, 290 190, 310 130" class="trace" />
+            <circle cx="210" cy="130" r="8" class="star-dot" />
+            <circle cx="280" cy="90" r="4" class="planet-dot" />
+            <line x1="210" y1="130" x2="280" y2="90" class="faint-line" />
+            <text x="26" y="40">sky-plane wobble</text>
+            <text x="245" y="82">planet</text>
+            <text x="220" y="153">star</text>
+          </svg>
+        </article>
+      </div>
+    </section>
+
+    <section class="slide" id="imaging" data-title="Direct Imaging">
+      <div class="chapter">Section 07</div>
+      <div class="split reverse">
+        <div>
+          <h2>Direct imaging</h2>
+          <p class="big-text">This is the most intuitive method and one of the hardest.</p>
+          <p>Planets are faint and close to extremely bright stars. Instruments use coronagraphs, adaptive optics, infrared imaging and post-processing to suppress the glare.</p>
+          <div class="formula-card compact">
+            <span>Reflected-light contrast</span>
+            <strong>F<sub>p</sub>/F<sub>★</sub> = p(λ)(R<sub>p</sub>/a)²g(α)</strong>
+          </div>
+        </div>
+        <div class="imaging-demo" aria-label="Direct imaging visual">
+          <div class="glare"></div>
+          <div class="coronagraph">star blocked</div>
+          <div class="exo exo-a"></div>
+          <div class="exo exo-b"></div>
+          <div class="label-line">Look for faint points after subtracting the star.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide interactive" id="microlensing" data-title="Microlensing">
+      <div class="chapter">Section 08</div>
+      <div class="split">
+        <div>
+          <h2>Gravitational microlensing</h2>
+          <p class="big-text">A foreground star bends and magnifies light from a background star. A planet can create a short extra bump.</p>
+          <p>This method can detect planets at large distances and does not require the host star to be bright, but events are rare and usually non-repeatable.</p>
+          <div class="controls">
+            <label>Alignment quality <input id="lensAlign" type="range" min="1" max="10" value="5"></label>
+          </div>
+        </div>
+        <div class="sim-card">
+          <canvas id="lensCanvas" width="720" height="460" aria-label="Microlensing light curve simulation"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="compare" data-title="Compare">
+      <div class="chapter">Section 09</div>
+      <h2>Which method finds what?</h2>
+      <div class="comparison-table" role="table" aria-label="Comparison of exoplanet detection methods">
+        <div class="row head" role="row">
+          <span>Method</span><span>Best at</span><span>Main limitation</span><span>Key output</span>
+        </div>
+        <div class="row" role="row">
+          <span>Transit</span><span>Close-in edge-on planets</span><span>Needs alignment</span><span>Radius, period</span>
+        </div>
+        <div class="row" role="row">
+          <span>Radial velocity</span><span>Massive close-in planets</span><span>Inclination degeneracy</span><span>M sin i, orbit</span>
+        </div>
+        <div class="row" role="row">
+          <span>Pulsar timing</span><span>Planets around precise clocks</span><span>Rare systems</span><span>Timing residuals</span>
+        </div>
+        <div class="row" role="row">
+          <span>Astrometry</span><span>Wide, massive planets nearby</span><span>Tiny angular shift</span><span>True mass, inclination</span>
+        </div>
+        <div class="row" role="row">
+          <span>Direct imaging</span><span>Young, hot, wide planets</span><span>Stellar glare</span><span>Spectrum, orbit</span>
+        </div>
+        <div class="row" role="row">
+          <span>Microlensing</span><span>Distant/cold planets</span><span>One-time event</span><span>Mass ratio, separation</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="future" data-title="Future">
+      <div class="chapter">Section 10</div>
+      <h2>The future: better instruments + better algorithms</h2>
+      <div class="future-grid">
+        <article>
+          <h3>Precision photometry</h3>
+          <p>Cleaner light curves help us detect smaller transits and improve atmospheric follow-up.</p>
+        </article>
+        <article>
+          <h3>Extreme adaptive optics</h3>
+          <p>Sharper imaging reduces atmospheric distortion and separates planets from stellar glare.</p>
+        </article>
+        <article>
+          <h3>Spectroscopy</h3>
+          <p>Absorption and emission features can reveal atmospheric chemistry and temperature.</p>
+        </article>
+        <article>
+          <h3>Machine learning</h3>
+          <p>ML can classify candidates, remove systematics and search large mission archives.</p>
+        </article>
+      </div>
+      <p class="closing-line">The goal is shifting from “is there a planet?” to “what kind of world is it?”</p>
+    </section>
+
+    <section class="slide resources" id="resources" data-title="Resources">
+      <div class="chapter">Section 11</div>
+      <h2>Further reading + project links</h2>
+      <div class="resource-grid">
+        <a href="https://exoplanets.nasa.gov/" target="_blank" rel="noreferrer">NASA Exoplanet Exploration</a>
+        <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" rel="noreferrer">NASA Exoplanet Archive</a>
+        <a href="https://eyes.nasa.gov/apps/exo/" target="_blank" rel="noreferrer">NASA Eyes on Exoplanets</a>
+        <a href="https://www.esa.int/Science_Exploration/Space_Science/Cheops" target="_blank" rel="noreferrer">ESA CHEOPS</a>
+        <a href="https://tess.mit.edu/" target="_blank" rel="noreferrer">TESS Mission</a>
+        <a href="https://arxiv.org/search/astro-ph?query=exoplanet+detection" target="_blank" rel="noreferrer">Exoplanet papers on arXiv</a>
+      </div>
+      <div class="end-card">
+        <h3>Thank you.</h3>
+        <p>Use this as a starting point. Edit the text, add your mentor credits, and replace the resources with the links you want students to read.</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="keyboard-help" aria-hidden="true">↑ ↓</div>
+  <script src="script.js"></script>
+</body>
+</html>
