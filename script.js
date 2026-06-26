@@ -751,6 +751,3 @@ render();
 const hash = location.hash.match(/slide-(\d+)/);
 if (hash) goTo(Number(hash[1]) - 1);
 drawBackground();
-
-
-can u just remove duration from each slide and send me back the code
