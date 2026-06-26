@@ -1,505 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Exoplanet Detection · Presentation</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #050b16;
-      color: #e0edf8;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      overflow: hidden;
-      height: 100vh;
-      width: 100vw;
-    }
-    canvas#spaceCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 0;
-      pointer-events: none;
-    }
-    #app {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      width: 100vw;
-      padding: 0 2rem 2rem 2rem;
-      background: transparent;
-    }
-    #toolbar {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 1rem 0 0.5rem 0;
-      flex-shrink: 0;
-      flex-wrap: wrap;
-      background: transparent;
-    }
-    #toolbar button {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: #b8d0e5;
-      padding: 0.4rem 1rem;
-      border-radius: 40px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      backdrop-filter: blur(6px);
-      transition: background 0.2s, border-color 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      letter-spacing: 0.3px;
-    }
-    #toolbar button:hover {
-      background: rgba(125,211,252,0.15);
-      border-color: rgba(125,211,252,0.3);
-      color: #fff;
-    }
-    #toolbar .badge {
-      background: rgba(125,211,252,0.15);
-      border-radius: 30px;
-      padding: 0.3rem 1rem;
-      font-size: 0.75rem;
-      color: #8fc8f0;
-      border: 1px solid rgba(125,211,252,0.1);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    #progressRail {
-      flex: 1;
-      height: 4px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 4px;
-      min-width: 60px;
-      position: relative;
-    }
-    #progressLine {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #7dd3fc, #a78bfa);
-      border-radius: 4px;
-      transition: width 0.4s ease;
-    }
-    #deck {
-      flex: 1;
-      position: relative;
-      margin-top: 0.25rem;
-      overflow: hidden;
-      border-radius: 20px;
-      background: rgba(4, 10, 22, 0.7);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(255,255,255,0.05);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-    }
-    .slide {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      padding: 2.2rem 3rem 2.2rem 3rem;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2.5rem;
-      opacity: 0;
-      transform: scale(0.97);
-      transition: opacity 0.5s cubic-bezier(0.23,1,0.32,1), transform 0.5s cubic-bezier(0.23,1,0.32,1);
-      pointer-events: none;
-      overflow-y: auto;
-      align-content: start;
-    }
-    .slide.active {
-      opacity: 1;
-      transform: scale(1);
-      pointer-events: auto;
-    }
-    .slide.past {
-      opacity: 0;
-      transform: scale(0.96);
-      pointer-events: none;
-    }
-    .slide-content {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      padding-right: 0.5rem;
-    }
-    .eyebrow {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: #7dd3fc;
-      opacity: 0.7;
-      margin-bottom: 0.2rem;
-    }
-    .slide h1 {
-      font-size: 2.8rem;
-      font-weight: 600;
-      background: linear-gradient(135deg, #f0f9ff, #b8d0e5);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      line-height: 1.1;
-      letter-spacing: -0.5px;
-    }
-    .slide h2 {
-      font-size: 2rem;
-      font-weight: 500;
-      color: #e0edf8;
-      line-height: 1.2;
-      letter-spacing: -0.3px;
-    }
-    .subtitle {
-      font-size: 1.1rem;
-      color: #b0cce0;
-      opacity: 0.85;
-      line-height: 1.5;
-      max-width: 90%;
-      margin-top: 0.2rem;
-    }
-    .body {
-      font-size: 0.95rem;
-      line-height: 1.6;
-      color: #c8dcec;
-      margin-top: 0.4rem;
-      overflow-y: auto;
-      max-height: 70vh;
-    }
-    .body ul {
-      list-style: none;
-      padding-left: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-    }
-    .body ul li {
-      padding-left: 1.6rem;
-      position: relative;
-    }
-    .body ul li::before {
-      content: "▹";
-      position: absolute;
-      left: 0;
-      color: #7dd3fc;
-      opacity: 0.7;
-    }
-    .body .cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.8rem;
-      margin: 1rem 0 0.5rem 0;
-    }
-    .card {
-      background: rgba(255,255,255,0.04);
-      border-radius: 14px;
-      padding: 0.9rem 1.2rem;
-      border: 1px solid rgba(255,255,255,0.06);
-      backdrop-filter: blur(4px);
-    }
-    .card h3 {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #7dd3fc;
-      margin-bottom: 0.2rem;
-    }
-    .card p {
-      font-size: 0.85rem;
-      color: #b0cce0;
-      line-height: 1.4;
-    }
-    .equation {
-      background: rgba(0,0,0,0.3);
-      padding: 0.6rem 1rem;
-      border-radius: 12px;
-      font-family: 'Courier New', monospace;
-      text-align: center;
-      font-size: 1.1rem;
-      color: #d6eaff;
-      margin: 0.6rem 0;
-      border-left: 3px solid #7dd3fc;
-    }
-    .callout {
-      background: rgba(125,211,252,0.08);
-      border-left: 3px solid #7dd3fc;
-      padding: 0.6rem 1rem;
-      border-radius: 8px;
-      margin: 0.5rem 0;
-      color: #c8dcec;
-    }
-    .table-wrap {
-      overflow-x: auto;
-      margin: 0.8rem 0;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8rem;
-      background: rgba(0,0,0,0.2);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    th, td {
-      padding: 0.6rem 0.8rem;
-      text-align: left;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    th {
-      color: #7dd3fc;
-      font-weight: 500;
-    }
-    .visual-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,0.25);
-      border-radius: 20px;
-      padding: 1rem;
-      min-height: 200px;
-      position: relative;
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-    .visual-inner {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-    .slide-photo {
-      max-width: 100%;
-      max-height: 100%;
-      border-radius: 12px;
-      object-fit: contain;
-      background: rgba(0,0,0,0.3);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    }
-    .slide-number {
-      position: absolute;
-      bottom: 0.5rem;
-      right: 0.8rem;
-      font-size: 0.7rem;
-      opacity: 0.3;
-      color: #b0cce0;
-      letter-spacing: 0.5px;
-    }
-    /* visual primitives */
-    .orbit-visual, .transit-system, .rv-visual, .lens-visual, .pulsar-visual, .astrometry-visual, .imaging-visual, .neural-visual, .method-compass, .final-visual {
-      width: 100%;
-      height: 100%;
-      min-height: 160px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-    .orbit-ring { position: absolute; border: 1px solid rgba(125,211,252,0.2); border-radius: 50%; width: 60%; height: 60%; }
-    .r2 { width: 85%; height: 85%; border-color: rgba(125,211,252,0.08); }
-    .star-core { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle, #fde047, #f59e0b); box-shadow: 0 0 40px rgba(253,224,71,0.3); }
-    .planet-dot { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: #7dd3fc; box-shadow: 0 0 20px rgba(125,211,252,0.2); }
-    .p2 { width: 8px; height: 8px; background: #a78bfa; }
-    /* transit */
-    .transit-star { position: relative; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, #fcd34d, #d97706); box-shadow: 0 0 60px rgba(252,211,77,0.2); }
-    .transit-planet { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 18px; height: 18px; border-radius: 50%; background: rgba(0,0,0,0.7); }
-    .lightcurve { width: 100%; max-width: 300px; height: auto; }
-    .graph-axis { stroke: rgba(255,255,255,0.12); stroke-width: 1.5; }
-    .graph-line { stroke: #7dd3fc; stroke-width: 2.5; fill: none; }
-    .graph-label { fill: rgba(255,255,255,0.25); font-size: 11px; font-family: system-ui; }
-    /* rv */
-    .wobble { position: relative; width: 100px; height: 60px; }
-    .bary { position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 50%; transform: translate(-50%,-50%); }
-    .w-star { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; border-radius: 50%; background: #fcd34d; transform: translate(-50%,-50%) translateX(20px); box-shadow: 0 0 30px rgba(252,211,77,0.2); }
-    .w-planet { position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; border-radius: 50%; background: #7dd3fc; transform: translate(-50%,-50%) translateX(-40px); box-shadow: 0 0 20px rgba(125,211,252,0.2); }
-    .spectrum { display: flex; gap: 6px; margin-top: 10px; }
-    .spectral-line { width: 4px; height: 28px; background: rgba(255,255,255,0.2); border-radius: 2px; }
-    /* lens */
-    .lens-row { position: relative; width: 100%; height: 80px; display: flex; align-items: center; justify-content: space-around; }
-    .source-star { width: 20px; height: 20px; border-radius: 50%; background: #fcd34d; box-shadow: 0 0 40px rgba(252,211,77,0.2); }
-    .lens-star { width: 24px; height: 24px; border-radius: 50%; background: #7dd3fc; box-shadow: 0 0 40px rgba(125,211,252,0.2); }
-    .observer { width: 14px; height: 14px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1); }
-    .einstein-ring { position: absolute; width: 100px; height: 100px; border-radius: 50%; border: 1px dashed rgba(125,211,252,0.2); }
-    .light-ray { position: absolute; width: 60%; height: 2px; background: rgba(125,211,252,0.1); transform-origin: left; }
-    .r1 { transform: rotate(-12deg) translateX(20px); }
-    .r2 { transform: rotate(12deg) translateX(20px); }
-    /* pulsar */
-    .pulsar-core { width: 20px; height: 20px; border-radius: 50%; background: #f472b6; box-shadow: 0 0 60px rgba(244,114,182,0.3); }
-    .pulsar-beam { position: absolute; width: 80px; height: 4px; background: linear-gradient(90deg, #f472b6, transparent); transform-origin: left; animation: spin 3s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .pulse-wave { position: absolute; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(244,114,182,0.1); animation: pulse 1.5s ease-out infinite; }
-    @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(2); opacity: 0; } }
-    /* astrometry */
-    .wobble-trace { width: 100px; height: 60px; border: 1px solid rgba(134,239,172,0.15); border-radius: 50%; }
-    .sky-star { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #fcd34d; animation: wobble 4s ease-in-out infinite; }
-    @keyframes wobble { 0% { transform: translate(-30px,0); } 50% { transform: translate(30px,0); } 100% { transform: translate(-30px,0); } }
-    /* imaging */
-    .glare { position: absolute; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.15), transparent 70%); }
-    .coronagraph { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); }
-    .faint-planet { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #7dd3fc; box-shadow: 0 0 30px rgba(125,211,252,0.2); top: 20%; right: 10%; }
-    /* neural */
-    .neural-svg { width: 100%; height: 100%; max-width: 260px; stroke: rgba(125,211,252,0.1); stroke-width: 2; fill: none; }
-    .neural-node { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: rgba(192,132,252,0.3); }
-    /* compass */
-    .method-compass { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; width: 100%; max-width: 300px; }
-    .method-node { background: rgba(255,255,255,0.04); border-radius: 6px; padding: 4px 2px; font-size: 0.6rem; text-align: center; color: #b0cce0; border: 1px solid rgba(255,255,255,0.03); }
-    .method-node small { display: block; opacity: 0.5; font-size: 0.5rem; }
-    /* final */
-    .final-visual { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 280px; }
-    .final-step { display: flex; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 6px 12px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.04); font-size: 0.8rem; }
-    .final-step b { color: #7dd3fc; }
-    .final-step span { color: #b0cce0; opacity: 0.6; }
-    /* map overlay */
-    #slideMap {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(12px);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-    #slideMap.open { opacity: 1; pointer-events: auto; }
-    #mapGrid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 10px;
-      max-width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      padding: 1.5rem;
-      background: rgba(10,20,40,0.8);
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-    .map-tile {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 14px;
-      padding: 0.8rem 1rem;
-      text-align: left;
-      color: #b0cce0;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .map-tile:hover { background: rgba(125,211,252,0.08); border-color: rgba(125,211,252,0.2); }
-    .map-tile.active { border-color: #7dd3fc; background: rgba(125,211,252,0.08); }
-    .map-tile small { display: block; font-size: 0.6rem; opacity: 0.5; }
-    .map-tile strong { display: block; font-weight: 400; }
-    .map-tile span { font-size: 0.65rem; opacity: 0.4; }
-    #closeMap {
-      position: absolute;
-      top: 1.5rem;
-      right: 1.5rem;
-      background: none;
-      border: none;
-      color: #b0cce0;
-      font-size: 1.8rem;
-      cursor: pointer;
-    }
-    /* notes */
-    #speakerNotes {
-      position: fixed;
-      bottom: 2rem;
-      left: 2rem;
-      right: 2rem;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 20px;
-      padding: 1rem 2rem;
-      z-index: 50;
-      transform: translateY(120%);
-      transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
-      color: #b0cce0;
-      max-height: 40vh;
-      overflow-y: auto;
-    }
-    #speakerNotes.open { transform: translateY(0); }
-    #notesContent { font-size: 0.95rem; line-height: 1.6; }
-    #notesContent .duration { opacity: 0.5; font-size: 0.7rem; margin-bottom: 0.5rem; }
-    #closeNotes {
-      position: absolute;
-      top: 0.6rem;
-      right: 1.2rem;
-      background: none;
-      border: none;
-      color: #b0cce0;
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
-    #chapterRail {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-left: 0.5rem;
-    }
-    .chapter-dot {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.05);
-      color: #8fc8f0;
-      border-radius: 30px;
-      padding: 0.2rem 0.7rem;
-      font-size: 0.55rem;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .chapter-dot.active { background: rgba(125,211,252,0.1); border-color: #7dd3fc; }
-    .chapter-dot:hover { background: rgba(125,211,252,0.05); }
-    @media (max-width: 820px) {
-      #app { padding: 0 1rem 1rem 1rem; }
-      .slide { grid-template-columns: 1fr; padding: 1.5rem; gap: 1.5rem; }
-      .slide h1 { font-size: 2rem; }
-      .slide h2 { font-size: 1.5rem; }
-      .subtitle { font-size: 0.95rem; max-width: 100%; }
-      .body .cards { grid-template-columns: 1fr; }
-      #toolbar button { padding: 0.2rem 0.7rem; font-size: 0.7rem; }
-      #chapterRail { display: none; }
-    }
-  </style>
-</head>
-<body>
-  <canvas id="spaceCanvas"></canvas>
-  <div id="app">
-    <div id="toolbar">
-      <button id="menuBtn">☰ Map</button>
-      <button id="notesBtn">📝 Notes</button>
-      <span class="badge"><span id="counter">01 / 01</span></span>
-      <div id="progressRail"><div id="progressLine"></div></div>
-      <div id="chapterRail"></div>
-    </div>
-    <div id="deck"></div>
-  </div>
-
-  <div id="slideMap" aria-hidden="true">
-    <button id="closeMap">✕</button>
-    <div id="mapGrid"></div>
-  </div>
-
-  <div id="speakerNotes" aria-hidden="true">
-    <button id="closeNotes">✕</button>
-    <div id="notesContent"></div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
-  <script>
-    const slides = [
+const slides = [
   {
     section: 'Opening', visual: 'orbit',
     kicker: "Learners' Space Astronomy",
@@ -941,317 +440,310 @@
   }
 ];
 
-    const chapters = [...new Set(slides.map(s => s.section))];
-    let current = 0;
-    let wheelLock = false;
-    let notesOpen = false;
-    let mapOpen = false;
-    let burst = 0;
+const chapters = [...new Set(slides.map(s => s.section))];
+let current = 0;
+let wheelLock = false;
+let notesOpen = false;
+let mapOpen = false;
+let burst = 0;
 
-    const deck = document.getElementById('deck');
-    const counter = document.getElementById('counter');
-    const progressLine = document.getElementById('progressLine');
-    const chapterRail = document.getElementById('chapterRail');
-    const slideMap = document.getElementById('slideMap');
-    const mapGrid = document.getElementById('mapGrid');
-    const speakerNotes = document.getElementById('speakerNotes');
-    const notesContent = document.getElementById('notesContent');
+const deck = document.getElementById('deck');
+const counter = document.getElementById('counter');
+const progressLine = document.getElementById('progressLine');
+const chapterRail = document.getElementById('chapterRail');
+const slideMap = document.getElementById('slideMap');
+const mapGrid = document.getElementById('mapGrid');
+const speakerNotes = document.getElementById('speakerNotes');
+const notesContent = document.getElementById('notesContent');
 
-    function pad(n) { return String(n).padStart(2, '0'); }
-    function totalDuration() { return slides.reduce((sum, slide) => sum + (slide.duration || 60), 0); }
-    function elapsedBefore(index) { return slides.slice(0, index).reduce((sum, slide) => sum + (slide.duration || 60), 0); }
-    function mins(seconds) { return `${Math.round(seconds / 60)} min`; }
+function pad(n) { return String(n).padStart(2, '0'); }
 
-    function visualMarkup(type) {
-      switch (type) {
-        case 'transit': return `<div class="transit-system"><div class="transit-star"><span class="transit-planet"></span></div><svg class="lightcurve" viewBox="0 0 520 250"><line class="graph-axis" x1="35" y1="210" x2="495" y2="210"/><line class="graph-axis" x1="35" y1="30" x2="35" y2="210"/><path class="graph-line" d="M40 70 L175 70 C190 75, 205 132, 230 134 L302 134 C327 132, 342 75, 360 70 L495 70"/><text class="graph-label" x="210" y="235">time</text><text class="graph-label" x="7" y="38">flux</text></svg></div>`;
-        case 'rv': return `<div class="rv-visual"><div class="wobble"><span class="bary"></span><span class="w-star"></span><span class="w-planet"></span></div><div class="spectrum"><span class="spectral-line"></span><span class="spectral-line"></span><span class="spectral-line"></span><span class="spectral-line"></span></div></div>`;
-        case 'lens': return `<div class="lens-visual"><div class="lens-row"><span class="source-star"></span><span class="light-ray r1"></span><span class="light-ray r2"></span><span class="lens-star"></span><span class="einstein-ring"></span><span class="observer"></span></div><svg class="lightcurve" viewBox="0 0 520 250"><line class="graph-axis" x1="35" y1="210" x2="495" y2="210"/><line class="graph-axis" x1="35" y1="30" x2="35" y2="210"/><path class="graph-line" d="M35 205 C130 204, 180 175, 225 92 C258 32, 300 48, 326 107 C340 139, 348 88, 360 84 C371 80, 375 151, 395 176 C425 205, 475 205, 495 205"/></svg></div>`;
-        case 'pulsar': return `<div class="pulsar-visual"><span class="pulsar-beam"></span><span class="pulsar-core"></span><span class="orbit-ring"></span><span class="orbit-ring r2"></span><span class="planet-dot p2"></span><span class="pulse-wave"></span></div>`;
-        case 'astrometry': return `<div class="astrometry-visual"><span class="wobble-trace"></span><span class="sky-star"></span></div>`;
-        case 'imaging': return `<div class="imaging-visual"><span class="glare"></span><span class="coronagraph"></span><span class="faint-planet"></span></div>`;
-        case 'neural': return `<div class="neural-visual"><svg class="neural-svg" viewBox="0 0 360 330"><line x1="53" y1="40" x2="162" y2="106"/><line x1="65" y1="191" x2="162" y2="106"/><line x1="162" y1="106" x2="245" y2="46"/><line x1="162" y1="106" x2="274" y2="218"/><line x1="153" y1="257" x2="274" y2="218"/><line x1="65" y1="191" x2="153" y2="257"/><line x1="245" y1="46" x2="274" y2="218"/></svg><span class="neural-node"></span><span class="neural-node"></span><span class="neural-node"></span><span class="neural-node"></span><span class="neural-node"></span><span class="neural-node"></span></div>`;
-        case 'compass': return `<div class="method-compass">
-            <div class="method-node">Transit</div>
-            <div class="method-node">RV</div>
-            <div class="method-node">Imaging</div>
-            <div class="method-node">Lensing</div>
-            <div class="method-node">Timing</div>
-            <div class="method-node">Astrometry</div>
-            <div class="method-node">Orbital Brightness</div>
-            <div class="method-node">Planet<small>Signal</small></div>
-            </div>`;
-        case 'final': return `<div class="final-visual"><div class="final-step"><b>Question</b><span>why?</span></div><div class="final-step"><b>Observable</b><span>what?</span></div><div class="final-step"><b>Model</b><span>how?</span></div><div class="final-step"><b>Planet</b><span>found</span></div></div>`;
-        case 'orbit':
-        default: return `<div class="orbit-visual"><span class="orbit-ring"></span><span class="orbit-ring r2"></span><span class="star-core"></span><span class="planet-dot"></span><span class="planet-dot p2"></span></div>`;
-      }
-    }
+function visualMarkup(type) {
+  switch (type) {
+    case 'transit': return `<div class="transit-system"><div class="transit-star"><span class="transit-planet"></span></div><svg class="lightcurve" viewBox="0 0 520 250"><line class="graph-axis" x1="35" y1="210" x2="495" y2="210"/><line class="graph-axis" x1="35" y1="30" x2="35" y2="210"/><path class="graph-line" d="M40 70 L175 70 C190 75, 205 132, 230 134 L302 134 C327 132, 342 75, 360 70 L495 70"/><text class="graph-label" x="210" y="235">time</text><text class="graph-label" x="7" y="38">flux</text></svg></div>`;
+    case 'rv': return `<div class="rv-visual"><div class="wobble"><span class="bary"></span><span class="w-star"></span><span class="w-planet"></span></div><div class="spectrum"><span class="spectral-line"></span><span class="spectral-line"></span><span class="spectral-line"></span><span class="spectral-line"></span></div></div>`;
+    case 'lens': return `<div class="lens-visual"><div class="lens-row"><span class="source-star"></span><span class="light-ray r1"></span><span class="light-ray r2"></span><span class="lens-star"></span><span class="einstein-ring"></span><span class="observer"></span></div><svg class="lightcurve" viewBox="0 0 520 250"><line class="graph-axis" x1="35" y1="210" x2="495" y2="210"/><line class="graph-axis" x1="35" y1="30" x2="35" y2="210"/><path class="graph-line" d="M35 205 C130 204, 180 175, 225 92 C258 32, 300 48, 326 107 C340 139, 348 88, 360 84 C371 80, 375 151, 395 176 C425 205, 475 205, 495 205"/></svg></div>`;
+    case 'pulsar': return `<div class="pulsar-visual"><span class="pulsar-beam"></span><span class="pulsar-core"></span><span class="orbit-ring"></span><span class="orbit-ring r2"></span><span class="planet-dot p2"></span><span class="pulse-wave"></span></div>`;
+    case 'astrometry': return `<div class="astrometry-visual"><span class="wobble-trace"></span><span class="sky-star"></span></div>`;
+    case 'imaging': return `<div class="imaging-visual"><span class="glare"></span><span class="coronagraph"></span><span class="faint-planet"></span></div>`;
+    case 'neural': return `<div class="neural-visual"><svg class="neural-svg" viewBox="0 0 360 330"><line x1="53" y1="40" x2="162" y2="106"/><line x1="65" y1="191" x2="162" y2="106"/><line x1="162" y1="106" x2="245" y2="46"/><line x1="162" y1="106" x2="274" y2="218"/><line x1="153" y1="257" x2="274" y2="218"/><line x1="65" y1="191" x2="153" y2="257"/><line x1="245" y1="46" x2="274" y2="218"/></svg><span class="neural-node"></span><span class="neural-node"></span><span class="neural-node"></span><span class="neural-node"></span><span class="neural-node"></span><span class="neural-node"></span></div>`;
+    case 'compass': return `<div class="method-compass">
+        <div class="method-node">Transit</div>
+        <div class="method-node">RV</div>
+        <div class="method-node">Imaging</div>
+        <div class="method-node">Lensing</div>
+        <div class="method-node">Timing</div>
+        <div class="method-node">Astrometry</div>
+        <div class="method-node">Orbital Brightness</div>
+        <div class="method-node">Planet<small>Signal</small></div>
+        </div>`;
+    case 'final': return `<div class="final-visual"><div class="final-step"><b>Question</b><span>why?</span></div><div class="final-step"><b>Observable</b><span>what?</span></div><div class="final-step"><b>Model</b><span>how?</span></div><div class="final-step"><b>Planet</b><span>found</span></div></div>`;
+    case 'orbit':
+    default: return `<div class="orbit-visual"><span class="orbit-ring"></span><span class="orbit-ring r2"></span><span class="star-core"></span><span class="planet-dot"></span><span class="planet-dot p2"></span></div>`;
+  }
+}
 
-    function render() {
-    deck.innerHTML = slides.map((slide, i) => `
-      <section class="slide" data-index="${i}" data-section="${slide.section}">
-        <div class="slide-content">
-          <p class="eyebrow">${slide.kicker || slide.section}</p>
-          ${i === 0 ? `<h1>${slide.title}</h1>` : `<h2>${slide.title}</h2>`}
-          <p class="subtitle">${slide.subtitle}</p>
-          <div class="body">${slide.body || ''}</div>
-        </div>
+function render() {
+deck.innerHTML = slides.map((slide, i) => `
+  <section class="slide" data-index="${i}" data-section="${slide.section}">
+    <div class="slide-content">
+      <p class="eyebrow">${slide.kicker || slide.section}</p>
+      ${i === 0 ? `<h1>${slide.title}</h1>` : `<h2>${slide.title}</h2>`}
+      <p class="subtitle">${slide.subtitle}</p>
+      <div class="body">${slide.body || ''}</div>
+    </div>
 
-        <div class="visual-card" aria-hidden="true">
-          <div class="visual-inner">
-            ${
-              slide.image
-                ? `<img class="slide-photo" src="${slide.image}" alt="">`
-                : visualMarkup(slide.visual)
-            }
-          </div>
-          <span class="slide-number">
-            ${pad(i + 1)} / ${pad(slides.length)}
-          </span>
-        </div>
-      </section>
-    `).join('');
-
-      chapterRail.innerHTML = chapters.map((ch, i) => {
-        const firstIndex = slides.findIndex(s => s.section === ch);
-        return `<button class="chapter-dot" data-target="${firstIndex}" aria-label="${ch}"><span>${ch}</span></button>`;
-      }).join('');
-
-      mapGrid.innerHTML = slides.map((slide, i) => `<button class="map-tile" data-target="${i}"><small>${pad(i + 1)} · ${slide.section}</small><strong>${slide.title}</strong><span>~${slide.duration || 60}s</span></button>`).join('');
-
-      document.querySelectorAll('[data-target]').forEach(btn => btn.addEventListener('click', () => {
-        goTo(Number(btn.dataset.target));
-        closeMap();
-      }));
-      update();
-      if (window.MathJax) {
-        MathJax.typesetPromise();
-      }
-    }
-
-    function update() {
-      document.querySelectorAll('.slide').forEach((el, i) => {
-        el.classList.toggle('active', i === current);
-        el.classList.toggle('past', i < current);
-      });
-      counter.textContent = `${pad(current + 1)} / ${pad(slides.length)}`;
-      progressLine.style.width = `${((current + 1) / slides.length) * 100}%`;
-      document.title = `${pad(current + 1)} · ${slides[current].title} | Exoplanet Detection`;
-      location.hash = `slide-${pad(current + 1)}`;
-
-      const currentChapter = slides[current].section;
-      document.querySelectorAll('.chapter-dot').forEach(dot => {
-        const target = Number(dot.dataset.target);
-        dot.classList.toggle('active', slides[target].section === currentChapter);
-      });
-      document.querySelectorAll('.map-tile').forEach((tile, i) => tile.classList.toggle('active', i === current));
-
-      const elapsed = elapsedBefore(current);
-      notesContent.innerHTML = `<p class="duration">Slide ${current + 1}/${slides.length} · suggested ${slides[current].duration || 60}s · elapsed ~${mins(elapsed)} / ${mins(totalDuration())}</p><p>${slides[current].notes || 'Use this slide as a visual pause.'}</p>`;
-      burst = 1;
-    }
-
-    function goTo(index) {
-      const next = Math.max(0, Math.min(slides.length - 1, index));
-      if (next === current) return;
-      current = next;
-      update();
-    }
-    function next() { goTo(current + 1); }
-    function prev() { goTo(current - 1); }
-    function openMap() { mapOpen = true; slideMap.classList.add('open'); slideMap.setAttribute('aria-hidden', 'false'); }
-    function closeMap() { mapOpen = false; slideMap.classList.remove('open'); slideMap.setAttribute('aria-hidden', 'true'); }
-    function toggleMap() { mapOpen ? closeMap() : openMap(); }
-    function toggleNotes() { notesOpen = !notesOpen; speakerNotes.classList.toggle('open', notesOpen); speakerNotes.setAttribute('aria-hidden', String(!notesOpen)); }
-
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { closeMap(); if (notesOpen) toggleNotes(); return; }
-      if (mapOpen && ['ArrowDown','ArrowUp','ArrowLeft','ArrowRight',' '].includes(e.key)) return;
-      if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); next(); }
-      if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); prev(); }
-      if (e.key === 'Home') { e.preventDefault(); goTo(0); }
-      if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
-      if (e.key.toLowerCase() === 'o') toggleMap();
-      if (e.key.toLowerCase() === 'n') toggleNotes();
-      if (e.key.toLowerCase() === 'f') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
-    });
-
-    window.addEventListener('wheel', (e) => {
-      if (mapOpen) return;
-      e.preventDefault();
-      if (wheelLock) return;
-      wheelLock = true;
-      e.deltaY > 0 ? next() : prev();
-      setTimeout(() => wheelLock = false, 720);
-    }, { passive: false });
-
-    let touchStartY = null;
-    window.addEventListener('touchstart', (e) => { touchStartY = e.changedTouches[0].clientY; }, { passive: true });
-    window.addEventListener('touchend', (e) => {
-      if (touchStartY === null) return;
-      const dy = e.changedTouches[0].clientY - touchStartY;
-      if (Math.abs(dy) > 60) dy < 0 ? next() : prev();
-      touchStartY = null;
-    }, { passive: true });
-
-    document.getElementById('menuBtn').addEventListener('click', toggleMap);
-    document.getElementById('closeMap').addEventListener('click', closeMap);
-    document.getElementById('notesBtn').addEventListener('click', toggleNotes);
-    document.getElementById('closeNotes').addEventListener('click', toggleNotes);
-    slideMap.addEventListener('click', (e) => { if (e.target === slideMap) closeMap(); });
-
-    // Canvas starfield and chapter-specific animations
-    const canvas = document.getElementById('spaceCanvas');
-    const ctx = canvas.getContext('2d');
-    let W = 0, H = 0, DPR = 1;
-    let stars = [];
-    let t = 0;
-
-    function resize() {
-      DPR = Math.min(window.devicePixelRatio || 1, 2);
-      W = canvas.width = Math.floor(innerWidth * DPR);
-      H = canvas.height = Math.floor(innerHeight * DPR);
-      canvas.style.width = innerWidth + 'px';
-      canvas.style.height = innerHeight + 'px';
-      stars = Array.from({ length: Math.min(360, Math.floor(innerWidth * innerHeight / 4200)) }, () => ({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        z: Math.random() * 1 + .25,
-        r: Math.random() * 1.4 + .2,
-        vx: (Math.random() - .5) * .06,
-        vy: (Math.random() - .5) * .06,
-        tw: Math.random() * Math.PI * 2
-      }));
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    function bgForSection(section) {
-      const palettes = {
-        'Opening': ['#081326', '#130b2c'],
-        'Basics': ['#061324', '#0d1d35'],
-        'History': ['#120c2c', '#20113f'],
-        'Pulsar Timing': ['#061629', '#101c52'],
-        'Direct Imaging': ['#1a1206', '#2a1026'],
-        'Microlensing': ['#081421', '#1b1738'],
-        'Astrometry': ['#061820', '#0d2733'],
-        'Transits': ['#0b1428', '#28133a'],
-        'Radial Velocity': ['#120a22', '#031929'],
-        'Combining Methods': ['#071023', '#192449'],
-        'Future': ['#061b1c', '#11123e'],
-        'Activity': ['#161426', '#0c1d2a'],
-        'Recap': ['#050b16', '#17112b']
-      };
-      return palettes[section] || palettes.Opening;
-    }
-
-    function drawBackground() {
-      const section = slides[current].section;
-      const [c1, c2] = bgForSection(section);
-      const grad = ctx.createLinearGradient(0, 0, W, H);
-      grad.addColorStop(0, c1);
-      grad.addColorStop(1, c2);
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, W, H);
-
-      const cx = W * .5, cy = H * .5;
-      const warp = burst;
-      for (const s of stars) {
-        const dx = s.x - cx;
-        const dy = s.y - cy;
-        s.x += s.vx * DPR + dx * 0.0022 * warp;
-        s.y += s.vy * DPR + dy * 0.0022 * warp;
-        if (s.x < 0 || s.x > W || s.y < 0 || s.y > H) { s.x = Math.random() * W; s.y = Math.random() * H; }
-        const alpha = 0.45 + 0.45 * Math.sin(t * .03 + s.tw);
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(255,255,255,${alpha * s.z})`;
-        ctx.arc(s.x, s.y, s.r * DPR * s.z * (1 + warp * .7), 0, Math.PI * 2);
-        ctx.fill();
-        if (warp > .05) {
-          ctx.strokeStyle = `rgba(125,211,252,${0.26 * warp})`;
-          ctx.beginPath();
-          ctx.moveTo(s.x, s.y);
-          ctx.lineTo(s.x - dx * .035 * warp, s.y - dy * .035 * warp);
-          ctx.stroke();
+    <div class="visual-card" aria-hidden="true">
+      <div class="visual-inner">
+        ${
+          slide.image
+            ? `<img class="slide-photo" src="${slide.image}" alt="">`
+            : visualMarkup(slide.visual)
         }
-      }
+      </div>
+      <span class="slide-number">
+        ${pad(i + 1)} / ${pad(slides.length)}
+      </span>
+    </div>
+  </section>
+`).join('');
 
-      drawMode(section);
-      burst *= .92;
-      if (burst < .01) burst = 0;
-      t++;
-      requestAnimationFrame(drawBackground);
-    }
+  chapterRail.innerHTML = chapters.map((ch, i) => {
+    const firstIndex = slides.findIndex(s => s.section === ch);
+    return `<button class="chapter-dot" data-target="${firstIndex}" aria-label="${ch}"><span>${ch}</span></button>`;
+  }).join('');
 
-    function drawMode(section) {
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      const time = t / 60;
-      if (section === 'Pulsar Timing') drawPulsarMode(time);
-      else if (section === 'Transits') drawTransitMode(time);
-      else if (section === 'Radial Velocity') drawRVMode(time);
-      else if (section === 'Microlensing') drawLensMode(time);
-      else if (section === 'Astrometry') drawAstroMode(time);
-      else if (section === 'Direct Imaging') drawImagingMode(time);
-      else if (section === 'Future') drawNeuralMode(time);
-      else drawConstellationMode(time);
-      ctx.restore();
-    }
+  mapGrid.innerHTML = slides.map((slide, i) => `<button class="map-tile" data-target="${i}"><small>${pad(i + 1)} · ${slide.section}</small><strong>${slide.title}</strong></button>`).join('');
 
-    function drawConstellationMode(time) {
-      const pts = stars.slice(0, 18);
-      ctx.strokeStyle = 'rgba(125,211,252,.10)';
-      ctx.lineWidth = DPR;
-      for (let i = 0; i < pts.length - 1; i++) {
-        if (i % 3 !== 0) continue;
-        ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[i+1].x, pts[i+1].y); ctx.stroke();
-      }
-    }
-    function drawPulsarMode(time) {
-      const x = W * .82, y = H * .25;
-      ctx.translate(x, y); ctx.rotate(time * 2.6);
-      const grd = ctx.createLinearGradient(-180*DPR, 0, 180*DPR, 0);
-      grd.addColorStop(0, 'transparent'); grd.addColorStop(.5, 'rgba(103,232,249,.24)'); grd.addColorStop(1, 'transparent');
-      ctx.fillStyle = grd; ctx.fillRect(-220*DPR, -18*DPR, 440*DPR, 36*DPR);
-      ctx.beginPath(); ctx.fillStyle = 'rgba(103,232,249,.55)'; ctx.arc(0, 0, 18*DPR, 0, Math.PI*2); ctx.fill();
-    }
-    function drawTransitMode(time) {
-      const x = W * .82, y = H * .30, R = 52*DPR;
-      const px = x + Math.sin(time * 1.5) * 95 * DPR;
-      ctx.beginPath(); ctx.fillStyle = 'rgba(252,211,77,.35)'; ctx.arc(x, y, R, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.fillStyle = 'rgba(2,6,18,.95)'; ctx.arc(px, y, 13*DPR, 0, Math.PI*2); ctx.fill();
-    }
-    function drawRVMode(time) {
-      const baseX = W * .81, baseY = H * .27;
-      ctx.strokeStyle = 'rgba(125,211,252,.16)'; ctx.lineWidth = 2*DPR; ctx.beginPath();
-      for (let i=0;i<260;i++){ const x=baseX-130*DPR+i*DPR; const y=baseY + Math.sin(i/22 + time*2)*34*DPR; i?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke();
-    }
-    function drawLensMode(time) {
-      const x = W * .82, y = H * .28;
-      for (let r=40; r<110; r+=22) { ctx.beginPath(); ctx.strokeStyle = `rgba(125,211,252,${.14 + .06*Math.sin(time+r)})`; ctx.arc(x, y, (r + Math.sin(time*2)*8)*DPR, 0, Math.PI*2); ctx.stroke(); }
-    }
-    function drawAstroMode(time) {
-      const x = W * .82, y = H * .28;
-      ctx.strokeStyle = 'rgba(134,239,172,.20)'; ctx.setLineDash([6*DPR, 8*DPR]); ctx.beginPath(); ctx.ellipse(x, y, 70*DPR, 38*DPR, .3, 0, Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
-      ctx.beginPath(); ctx.fillStyle = 'rgba(252,211,77,.45)'; ctx.arc(x + Math.cos(time*2)*70*DPR, y + Math.sin(time*2)*38*DPR, 8*DPR, 0, Math.PI*2); ctx.fill();
-    }
-    function drawImagingMode(time) {
-      const x = W * .82, y = H * .28;
-      const g = ctx.createRadialGradient(x,y,0,x,y,160*DPR); g.addColorStop(0,'rgba(255,255,255,.25)'); g.addColorStop(.28,'rgba(252,211,77,.18)'); g.addColorStop(1,'transparent'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,160*DPR,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.fillStyle='rgba(2,6,18,.75)'; ctx.arc(x,y,34*DPR,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.fillStyle='rgba(125,211,252,.55)'; ctx.arc(x+105*DPR,y+Math.sin(time*2)*10*DPR,5*DPR,0,Math.PI*2); ctx.fill();
-    }
-    function drawNeuralMode(time) {
-      const nodes = [[.77,.18],[.87,.29],[.78,.43],[.90,.55],[.80,.70],[.68,.55],[.68,.31]];
-      ctx.strokeStyle = 'rgba(125,211,252,.13)'; ctx.lineWidth = DPR;
-      for (let i=0;i<nodes.length-1;i++){ ctx.beginPath(); ctx.moveTo(nodes[i][0]*W,nodes[i][1]*H); ctx.lineTo(nodes[i+1][0]*W,nodes[i+1][1]*H); ctx.stroke(); }
-      nodes.forEach((p,i)=>{ ctx.beginPath(); ctx.fillStyle=`rgba(192,132,252,${.25+.2*Math.sin(time*2+i)})`; ctx.arc(p[0]*W,p[1]*H,(7+2*Math.sin(time+i))*DPR,0,Math.PI*2); ctx.fill(); });
-    }
+  document.querySelectorAll('[data-target]').forEach(btn => btn.addEventListener('click', () => {
+    goTo(Number(btn.dataset.target));
+    closeMap();
+  }));
+  update();
+  if (window.MathJax) {
+    MathJax.typesetPromise();
+  }
+}
 
-    render();
-    const hash = location.hash.match(/slide-(\d+)/);
-    if (hash) goTo(Number(hash[1]) - 1);
-    drawBackground();
-  </script>
-</body>
-</html>
+function update() {
+  document.querySelectorAll('.slide').forEach((el, i) => {
+    el.classList.toggle('active', i === current);
+    el.classList.toggle('past', i < current);
+  });
+  counter.textContent = `${pad(current + 1)} / ${pad(slides.length)}`;
+  progressLine.style.width = `${((current + 1) / slides.length) * 100}%`;
+  document.title = `${pad(current + 1)} · ${slides[current].title} | Exoplanet Detection`;
+  location.hash = `slide-${pad(current + 1)}`;
+
+  const currentChapter = slides[current].section;
+  document.querySelectorAll('.chapter-dot').forEach(dot => {
+    const target = Number(dot.dataset.target);
+    dot.classList.toggle('active', slides[target].section === currentChapter);
+  });
+  document.querySelectorAll('.map-tile').forEach((tile, i) => tile.classList.toggle('active', i === current));
+
+  notesContent.innerHTML = `<p>Slide ${current + 1}/${slides.length}</p><p>${slides[current].notes || 'Use this slide as a visual pause.'}</p>`;
+  burst = 1;
+}
+
+function goTo(index) {
+  const next = Math.max(0, Math.min(slides.length - 1, index));
+  if (next === current) return;
+  current = next;
+  update();
+}
+function next() { goTo(current + 1); }
+function prev() { goTo(current - 1); }
+function openMap() { mapOpen = true; slideMap.classList.add('open'); slideMap.setAttribute('aria-hidden', 'false'); }
+function closeMap() { mapOpen = false; slideMap.classList.remove('open'); slideMap.setAttribute('aria-hidden', 'true'); }
+function toggleMap() { mapOpen ? closeMap() : openMap(); }
+function toggleNotes() { notesOpen = !notesOpen; speakerNotes.classList.toggle('open', notesOpen); speakerNotes.setAttribute('aria-hidden', String(!notesOpen)); }
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { closeMap(); if (notesOpen) toggleNotes(); return; }
+  if (mapOpen && ['ArrowDown','ArrowUp','ArrowLeft','ArrowRight',' '].includes(e.key)) return;
+  if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); next(); }
+  if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); prev(); }
+  if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  if (e.key === 'End') { e.preventDefault(); goTo(slides.length - 1); }
+  if (e.key.toLowerCase() === 'o') toggleMap();
+  if (e.key.toLowerCase() === 'n') toggleNotes();
+  if (e.key.toLowerCase() === 'f') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+});
+
+window.addEventListener('wheel', (e) => {
+  if (mapOpen) return;
+  e.preventDefault();
+  if (wheelLock) return;
+  wheelLock = true;
+  e.deltaY > 0 ? next() : prev();
+  setTimeout(() => wheelLock = false, 720);
+}, { passive: false });
+
+let touchStartY = null;
+window.addEventListener('touchstart', (e) => { touchStartY = e.changedTouches[0].clientY; }, { passive: true });
+window.addEventListener('touchend', (e) => {
+  if (touchStartY === null) return;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dy) > 60) dy < 0 ? next() : prev();
+  touchStartY = null;
+}, { passive: true });
+
+document.getElementById('menuBtn').addEventListener('click', toggleMap);
+document.getElementById('closeMap').addEventListener('click', closeMap);
+document.getElementById('notesBtn').addEventListener('click', toggleNotes);
+document.getElementById('closeNotes').addEventListener('click', toggleNotes);
+slideMap.addEventListener('click', (e) => { if (e.target === slideMap) closeMap(); });
+
+// Canvas starfield and chapter-specific animations
+const canvas = document.getElementById('spaceCanvas');
+const ctx = canvas.getContext('2d');
+let W = 0, H = 0, DPR = 1;
+let stars = [];
+let t = 0;
+
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = canvas.width = Math.floor(innerWidth * DPR);
+  H = canvas.height = Math.floor(innerHeight * DPR);
+  canvas.style.width = innerWidth + 'px';
+  canvas.style.height = innerHeight + 'px';
+  stars = Array.from({ length: Math.min(360, Math.floor(innerWidth * innerHeight / 4200)) }, () => ({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    z: Math.random() * 1 + .25,
+    r: Math.random() * 1.4 + .2,
+    vx: (Math.random() - .5) * .06,
+    vy: (Math.random() - .5) * .06,
+    tw: Math.random() * Math.PI * 2
+  }));
+}
+window.addEventListener('resize', resize);
+resize();
+
+function bgForSection(section) {
+  const palettes = {
+    'Opening': ['#081326', '#130b2c'],
+    'Basics': ['#061324', '#0d1d35'],
+    'History': ['#120c2c', '#20113f'],
+    'Pulsar Timing': ['#061629', '#101c52'],
+    'Direct Imaging': ['#1a1206', '#2a1026'],
+    'Microlensing': ['#081421', '#1b1738'],
+    'Astrometry': ['#061820', '#0d2733'],
+    'Transits': ['#0b1428', '#28133a'],
+    'Radial Velocity': ['#120a22', '#031929'],
+    'Combining Methods': ['#071023', '#192449'],
+    'Future': ['#061b1c', '#11123e'],
+    'Activity': ['#161426', '#0c1d2a'],
+    'Recap': ['#050b16', '#17112b']
+  };
+  return palettes[section] || palettes.Opening;
+}
+
+function drawBackground() {
+  const section = slides[current].section;
+  const [c1, c2] = bgForSection(section);
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, c1);
+  grad.addColorStop(1, c2);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  const cx = W * .5, cy = H * .5;
+  const warp = burst;
+  for (const s of stars) {
+    const dx = s.x - cx;
+    const dy = s.y - cy;
+    s.x += s.vx * DPR + dx * 0.0022 * warp;
+    s.y += s.vy * DPR + dy * 0.0022 * warp;
+    if (s.x < 0 || s.x > W || s.y < 0 || s.y > H) { s.x = Math.random() * W; s.y = Math.random() * H; }
+    const alpha = 0.45 + 0.45 * Math.sin(t * .03 + s.tw);
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(255,255,255,${alpha * s.z})`;
+    ctx.arc(s.x, s.y, s.r * DPR * s.z * (1 + warp * .7), 0, Math.PI * 2);
+    ctx.fill();
+    if (warp > .05) {
+      ctx.strokeStyle = `rgba(125,211,252,${0.26 * warp})`;
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(s.x - dx * .035 * warp, s.y - dy * .035 * warp);
+      ctx.stroke();
+    }
+  }
+
+  drawMode(section);
+  burst *= .92;
+  if (burst < .01) burst = 0;
+  t++;
+  requestAnimationFrame(drawBackground);
+}
+
+function drawMode(section) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  const time = t / 60;
+  if (section === 'Pulsar Timing') drawPulsarMode(time);
+  else if (section === 'Transits') drawTransitMode(time);
+  else if (section === 'Radial Velocity') drawRVMode(time);
+  else if (section === 'Microlensing') drawLensMode(time);
+  else if (section === 'Astrometry') drawAstroMode(time);
+  else if (section === 'Direct Imaging') drawImagingMode(time);
+  else if (section === 'Future') drawNeuralMode(time);
+  else drawConstellationMode(time);
+  ctx.restore();
+}
+
+function drawConstellationMode(time) {
+  const pts = stars.slice(0, 18);
+  ctx.strokeStyle = 'rgba(125,211,252,.10)';
+  ctx.lineWidth = DPR;
+  for (let i = 0; i < pts.length - 1; i++) {
+    if (i % 3 !== 0) continue;
+    ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[i+1].x, pts[i+1].y); ctx.stroke();
+  }
+}
+function drawPulsarMode(time) {
+  const x = W * .82, y = H * .25;
+  ctx.translate(x, y); ctx.rotate(time * 2.6);
+  const grd = ctx.createLinearGradient(-180*DPR, 0, 180*DPR, 0);
+  grd.addColorStop(0, 'transparent'); grd.addColorStop(.5, 'rgba(103,232,249,.24)'); grd.addColorStop(1, 'transparent');
+  ctx.fillStyle = grd; ctx.fillRect(-220*DPR, -18*DPR, 440*DPR, 36*DPR);
+  ctx.beginPath(); ctx.fillStyle = 'rgba(103,232,249,.55)'; ctx.arc(0, 0, 18*DPR, 0, Math.PI*2); ctx.fill();
+}
+function drawTransitMode(time) {
+  const x = W * .82, y = H * .30, R = 52*DPR;
+  const px = x + Math.sin(time * 1.5) * 95 * DPR;
+  ctx.beginPath(); ctx.fillStyle = 'rgba(252,211,77,.35)'; ctx.arc(x, y, R, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.fillStyle = 'rgba(2,6,18,.95)'; ctx.arc(px, y, 13*DPR, 0, Math.PI*2); ctx.fill();
+}
+function drawRVMode(time) {
+  const baseX = W * .81, baseY = H * .27;
+  ctx.strokeStyle = 'rgba(125,211,252,.16)'; ctx.lineWidth = 2*DPR; ctx.beginPath();
+  for (let i=0;i<260;i++){ const x=baseX-130*DPR+i*DPR; const y=baseY + Math.sin(i/22 + time*2)*34*DPR; i?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke();
+}
+function drawLensMode(time) {
+  const x = W * .82, y = H * .28;
+  for (let r=40; r<110; r+=22) { ctx.beginPath(); ctx.strokeStyle = `rgba(125,211,252,${.14 + .06*Math.sin(time+r)})`; ctx.arc(x, y, (r + Math.sin(time*2)*8)*DPR, 0, Math.PI*2); ctx.stroke(); }
+}
+function drawAstroMode(time) {
+  const x = W * .82, y = H * .28;
+  ctx.strokeStyle = 'rgba(134,239,172,.20)'; ctx.setLineDash([6*DPR, 8*DPR]); ctx.beginPath(); ctx.ellipse(x, y, 70*DPR, 38*DPR, .3, 0, Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.fillStyle = 'rgba(252,211,77,.45)'; ctx.arc(x + Math.cos(time*2)*70*DPR, y + Math.sin(time*2)*38*DPR, 8*DPR, 0, Math.PI*2); ctx.fill();
+}
+function drawImagingMode(time) {
+  const x = W * .82, y = H * .28;
+  const g = ctx.createRadialGradient(x,y,0,x,y,160*DPR); g.addColorStop(0,'rgba(255,255,255,.25)'); g.addColorStop(.28,'rgba(252,211,77,.18)'); g.addColorStop(1,'transparent'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,160*DPR,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.fillStyle='rgba(2,6,18,.75)'; ctx.arc(x,y,34*DPR,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.fillStyle='rgba(125,211,252,.55)'; ctx.arc(x+105*DPR,y+Math.sin(time*2)*10*DPR,5*DPR,0,Math.PI*2); ctx.fill();
+}
+function drawNeuralMode(time) {
+  const nodes = [[.77,.18],[.87,.29],[.78,.43],[.90,.55],[.80,.70],[.68,.55],[.68,.31]];
+  ctx.strokeStyle = 'rgba(125,211,252,.13)'; ctx.lineWidth = DPR;
+  for (let i=0;i<nodes.length-1;i++){ ctx.beginPath(); ctx.moveTo(nodes[i][0]*W,nodes[i][1]*H); ctx.lineTo(nodes[i+1][0]*W,nodes[i+1][1]*H); ctx.stroke(); }
+  nodes.forEach((p,i)=>{ ctx.beginPath(); ctx.fillStyle=`rgba(192,132,252,${.25+.2*Math.sin(time*2+i)})`; ctx.arc(p[0]*W,p[1]*H,(7+2*Math.sin(time+i))*DPR,0,Math.PI*2); ctx.fill(); });
+}
+
+render();
+const hash = location.hash.match(/slide-(\d+)/);
+if (hash) goTo(Number(hash[1]) - 1);
+drawBackground();
