@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exoplanet Detection | Learners' Space</title>
+  <meta name="description" content="A page-wise interactive presentation website on exoplanet detection methods." />
+  <link rel="stylesheet" href="style.css" />
+  <script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+  }
+};
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+  <canvas id="spaceCanvas" aria-hidden="true"></canvas>
+  <div class="aurora" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+  <button class="icon-button" id="menuBtn" aria-label="Open slide map">☰</button>
+
+  <div class="brand">
+    <img src="images/krittikalogow.png" alt="Logo" class="brand-mark">
+    <span>Exoplanet Detection</span>
+  </div>
+
+  <div class="progress-wrap" aria-label="Presentation progress">
+    <div class="progress-line"><span id="progressLine"></span></div>
+    <span id="counter">01 / 60</span>
+  </div>
+</header>
+
+  <aside class="chapter-rail" id="chapterRail" aria-label="Chapter navigation"></aside>
+
+  <main id="deck" class="deck" aria-live="polite"></main>
+
+  <section class="slide-map" id="slideMap" aria-hidden="true">
+    <div class="map-panel">
+      <div class="map-head">
+        <div>
+          <p class="eyebrow">Mission Map</p>
+          <h2>Jump to any slide</h2>
+        </div>
+        <button class="icon-button" id="closeMap" aria-label="Close slide map">×</button>
+      </div>
+      <div class="map-grid" id="mapGrid"></div>
+    </div>
+  </section>
+
+  <footer class="controls-hint">
+    <span>↑ ↓ ← →</span>
+    <span>O: Overview</span>
+    <span>F: Fullscreen</span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
