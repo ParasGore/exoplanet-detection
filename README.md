@@ -1,4 +1,0 @@
-- make equations work
-- change animations
-- get better speaker notes for myself
-- E
