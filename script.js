@@ -50,6 +50,7 @@ const slides = [
     section: 'History', visual: 'rv', duration: 70,
     kicker: 'Some background on where exoplanets are found', title: 'Where Exoplanets are Found',
     subtitle: '',
+    image: 'HRDiagram.png',
     body: `Star systems can be wildly different from the solar system. For instance, about 3 years after the first exoplanet was discovered, astronomers came across 51 Pegasi. This is a star very similar to our own sun. Using certain techniques, they detected a massive gas giant orbiting very close to the star (with an orbital period of only 4.2 days). This was a type of exoplanet known as a "Hot Jupiter"- which had previously only been theorized. With only our own solar system to go off of, this discovery was considered very surprising at the time. In general, most of the 6000 exoplanets we have discovered so far have been around F, G, and K-type stars (similar to or slightly different from our Sun). These stars are common, stable, and live long anough to make planet detection easier. Smaller stars have planets hard to detect with common methods, while hot and massive stars show much weaker observable effects from their planets. Astronomers naturally focused on the more accessible stars because expensive planet-hunting missions will obviously aim for the best chance of success.`,
     notes: `Explain why this discovery was weird: a Jupiter-mass planet so close to its star was not what the Solar System had trained astronomers to expect. This pushed planet migration and formation theories forward.`
   },
